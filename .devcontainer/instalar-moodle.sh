@@ -46,6 +46,10 @@ echo ">> Instalando o front..."
 cd "$REPO/front"
 npm install
 
+# Liga o Moodle e o front já na criação. O postStartCommand nem sempre roda depois
+# do postCreateCommand na primeira vez; o iniciar.sh não duplica o que já estiver rodando.
+bash "$REPO/.devcontainer/iniciar.sh"
+
 echo
 echo "Pronto. Abra a porta 5173 (Front GECAP) e entre com:"
 echo "  ana.ferreira@assistenciasocial.gov.br / Numep@2026"
