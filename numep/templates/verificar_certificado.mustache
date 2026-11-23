@@ -1,0 +1,66 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_numep/verificar_certificado
+
+    View da página pública de verificação de certificado (verificar.php).
+
+    Context variables required for this template:
+    * acao - URL do formulário
+    * codigo - código digitado
+    * pesquisou - se houve busca
+    * certificado - dados do certificado encontrado (ou ausente)
+
+    Example context (json):
+    {
+        "acao": "https://exemplo/local/numep/verificar.php",
+        "codigo": "NUMEP-ABCD-EFGH",
+        "pesquisou": true,
+        "certificado": {
+            "nome": "Ana Silva", "cpf_oculto": "***.982.247-**", "titulo": "Acolhimento no SUAS",
+            "carga_horaria": 8, "data": "20/10/2026", "emitido_em": "20/10/2026", "facilitador": false
+        }
+    }
+}}
+<div class="local-numep-verificar container py-3" style="max-width: 40rem;">
+    <form method="get" action="{{acao}}" class="mb-4">
+        <label for="numep-codigo" class="form-label">{{#str}}verificar_codigo, local_numep{{/str}}</label>
+        <div class="input-group">
+            <input type="text" id="numep-codigo" name="codigo" value="{{codigo}}" maxlength="32"
+                   class="form-control" placeholder="NUMEP-XXXX-XXXX" required>
+            <button type="submit" class="btn btn-primary">{{#str}}verificar_botao, local_numep{{/str}}</button>
+        </div>
+    </form>
+    {{#pesquisou}}
+        {{#certificado}}
+            <div class="alert alert-success" role="status">
+                <h3 class="h5">{{#str}}verificar_valido, local_numep{{/str}}</h3>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">{{#str}}verificar_nome, local_numep{{/str}}</dt><dd class="col-sm-8">{{nome}}</dd>
+                    {{#cpf_oculto}}<dt class="col-sm-4">CPF</dt><dd class="col-sm-8">{{cpf_oculto}}</dd>{{/cpf_oculto}}
+                    <dt class="col-sm-4">{{#str}}verificar_capacitacao, local_numep{{/str}}</dt><dd class="col-sm-8">{{titulo}}{{#facilitador}} ({{#str}}verificar_facilitador, local_numep{{/str}}){{/facilitador}}</dd>
+                    <dt class="col-sm-4">{{#str}}verificar_carga, local_numep{{/str}}</dt><dd class="col-sm-8">{{carga_horaria}} h</dd>
+                    <dt class="col-sm-4">{{#str}}verificar_data, local_numep{{/str}}</dt><dd class="col-sm-8">{{data}}</dd>
+                    <dt class="col-sm-4">{{#str}}verificar_emitido, local_numep{{/str}}</dt><dd class="col-sm-8">{{emitido_em}}</dd>
+                </dl>
+            </div>
+        {{/certificado}}
+        {{^certificado}}
+            <div class="alert alert-danger" role="alert">{{#str}}verificar_invalido, local_numep{{/str}}</div>
+        {{/certificado}}
+    {{/pesquisou}}
+</div>

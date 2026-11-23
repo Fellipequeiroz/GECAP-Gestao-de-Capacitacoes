@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/numep/db" VERSION="20261017" COMMENT="Tabelas do sistema NUMEP/SUAS (modelo_er_completo_numep.md adaptado ao Moodle)"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_numep_setor" COMMENT="SETOR: agrupamento de unidades da rede (ex.: Proteção Social Básica)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="nome" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="descricao" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="criado_em (timestamp Unix)"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_numep_unidade" COMMENT="UNIDADE: CRAS, CREAS, Secretaria etc.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="setor_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="nome" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="endereco" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="setor_id" TYPE="foreign" FIELDS="setor_id" REFTABLE="local_numep_setor" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_numep_cargo_tag" COMMENT="CARGO_TAG: área de atuação (Assistente Social, Psicólogo...), gerenciada pelo Master">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="nome" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="descricao" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="nome" UNIQUE="true" FIELDS="nome"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_pessoa" COMMENT="PESSOA + parte de ACESSO. Nome, e-mail, senha (hash SHA-512 crypt com salt, padrão do Moodle) e ativo ficam em mdl_user; o perfil hierárquico é um papel (role) do Moodle">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Vínculo 1:1 com mdl_user (o antigo ACESSO)"/>
+        <FIELD NAME="cpf" TYPE="char" LENGTH="11" NOTNULL="true" SEQUENCE="false" COMMENT="Somente dígitos"/>
+        <FIELD NAME="data_nascimento" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Timestamp Unix"/>
+        <FIELD NAME="telefone" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="formacao" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="ENUM validado no PHP: tecnico_medio | tecnico_superior"/>
+        <FIELD NAME="unidade_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Lotação (antes ACESSO.unidade_id)"/>
+        <FIELD NAME="cargo_tag_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Antes ACESSO.cargo_tag_id"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="unidade_id" TYPE="foreign" FIELDS="unidade_id" REFTABLE="local_numep_unidade" REFFIELDS="id"/>
+        <KEY NAME="cargo_tag_id" TYPE="foreign" FIELDS="cargo_tag_id" REFTABLE="local_numep_cargo_tag" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="cpf" UNIQUE="true" FIELDS="cpf"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_capacitacao" COMMENT="CAPACITACAO: tema ou assunto de uma formação">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="titulo" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="descricao" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_numep_evento" COMMENT="EVENTO: ocorrência específica de uma capacitação">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="capacitacao_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="local" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="data" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Data e hora do evento (timestamp Unix)"/>
+        <FIELD NAME="carga_horaria" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Em horas"/>
+        <FIELD NAME="modalidade" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="presencial" SEQUENCE="false" COMMENT="ENUM validado no PHP: presencial | ead"/>
+        <FIELD NAME="publico_alvo" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="rede_geral" SEQUENCE="false" COMMENT="Rótulo informativo: rede_geral | setor | unidade. Destinatários reais em local_numep_evento_unidade"/>
+        <FIELD NAME="facilitador_userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Facilitador interno. XOR com facilitador_nome_externo (validado em regras::validar_facilitador)"/>
+        <FIELD NAME="facilitador_nome_externo" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="encerrado" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 = aberto, 1 = encerrado"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="capacitacao_id" TYPE="foreign" FIELDS="capacitacao_id" REFTABLE="local_numep_capacitacao" REFFIELDS="id"/>
+        <KEY NAME="facilitador_userid" TYPE="foreign" FIELDS="facilitador_userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="data" UNIQUE="false" FIELDS="data"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_evento_unidade" COMMENT="EVENTO_UNIDADE: unidades que recebem o evento (seleção sempre manual)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="evento_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="unidade_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="evento_id" TYPE="foreign" FIELDS="evento_id" REFTABLE="local_numep_evento" REFFIELDS="id"/>
+        <KEY NAME="unidade_id" TYPE="foreign" FIELDS="unidade_id" REFTABLE="local_numep_unidade" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="uq_evento_unidade" UNIQUE="true" FIELDS="evento_id, unidade_id"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_frequencia" COMMENT="FREQUENCIA: presença de um participante em um evento">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="evento_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Participante (antes acesso_id)"/>
+        <FIELD NAME="presente" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="confirmado_por_userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Auditoria: quem confirmou a presença"/>
+        <FIELD NAME="confirmado_em" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="evento_id" TYPE="foreign" FIELDS="evento_id" REFTABLE="local_numep_evento" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="confirmado_por_userid" TYPE="foreign" FIELDS="confirmado_por_userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="uq_evento_acesso" UNIQUE="true" FIELDS="evento_id, userid" COMMENT="Regra 1: uma frequência por pessoa por evento"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_certificado" COMMENT="CERTIFICADO do participante, com snapshot dos dados do evento (regra 3)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="frequencia_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="titulo_evento_snapshot" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="carga_horaria_snapshot" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="data_evento_snapshot" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="codigo_verificacao" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Formato NUMEP-XXXX-XXXX, único entre os dois tipos de certificado"/>
+        <FIELD NAME="emitido_em" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="frequencia_id" TYPE="foreign-unique" FIELDS="frequencia_id" REFTABLE="local_numep_frequencia" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="codigo_verificacao" UNIQUE="true" FIELDS="codigo_verificacao"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_certificado_facilitador" COMMENT="CERTIFICADO_FACILITADOR, gerado no encerramento do evento">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="evento_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="nome_facilitador_snapshot" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="titulo_evento_snapshot" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="codigo_verificacao" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="emitido_em" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="evento_id" TYPE="foreign-unique" FIELDS="evento_id" REFTABLE="local_numep_evento" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="codigo_verificacao" UNIQUE="true" FIELDS="codigo_verificacao"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_numep_avaliacao_evento" COMMENT="AVALIACAO_EVENTO: avaliação do participante (não anônima por ora)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="frequencia_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="nota" TYPE="int" LENGTH="2" NOTNULL="true" SEQUENCE="false" COMMENT="1 a 5, validado no PHP"/>
+        <FIELD NAME="comentario" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="frequencia_id" TYPE="foreign-unique" FIELDS="frequencia_id" REFTABLE="local_numep_frequencia" REFFIELDS="id" COMMENT="Regra 9: uma avaliação por frequência"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_numep_feedback_facilitador" COMMENT="FEEDBACK_FACILITADOR: opinião do facilitador sobre o evento">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="evento_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="facilitador_userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Vazio quando o facilitador é externo"/>
+        <FIELD NAME="comentario" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="evento_id" TYPE="foreign" FIELDS="evento_id" REFTABLE="local_numep_evento" REFFIELDS="id"/>
+        <KEY NAME="facilitador_userid" TYPE="foreign" FIELDS="facilitador_userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="local_numep_atividade" COMMENT="Registro de atividades (quem fez o quê e quando), mostrado nas telas do Master">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Quem fez a ação"/>
+        <FIELD NAME="acao" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Ex.: Criou o evento"/>
+        <FIELD NAME="detalhe" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Ex.: título do evento"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
