@@ -1,0 +1,25 @@
+{
+  // Ambiente do GitHub Codespaces: Moodle 5.3 (PHP 8.3) + MySQL 8.4 + front React (Node 22).
+  // Na criação, instalar-moodle.sh baixa e instala o Moodle com o plugin local_numep e os dados de exemplo.
+  // A cada início, iniciar.sh liga o Moodle (porta 8080) e o front (porta 5173).
+  "name": "GECAP-NUMEP (Moodle 5.3 + MySQL 8.4)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+  },
+  "forwardPorts": [5173, 8080],
+  "portsAttributes": {
+    "5173": { "label": "Front GECAP", "onAutoForward": "openBrowser" },
+    "8080": { "label": "Moodle (API)", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "bash .devcontainer/instalar-moodle.sh",
+  "postStartCommand": "bash .devcontainer/iniciar.sh",
+  "hostRequirements": { "memory": "4gb" },
+  "customizations": {
+    "vscode": {
+      "extensions": ["bmewburn.vscode-intelephense-client", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
