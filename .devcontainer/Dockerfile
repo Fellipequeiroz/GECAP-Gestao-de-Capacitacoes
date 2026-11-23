@@ -1,7 +1,12 @@
 # PHP 8.3 com as extensões que o Moodle 5.3 exige (a imagem já traz git e composer).
 FROM mcr.microsoft.com/devcontainers/php:1-8.3-bookworm
 
-RUN apt-get update \
+USER root
+
+# A imagem base traz o repositório apt do Yarn, cuja chave de assinatura venceu e faz o
+# "apt-get update" falhar. O projeto não usa Yarn (o front usa npm), então ele é removido.
+RUN rm -f /etc/apt/sources.list.d/yarn*.list \
+    && apt-get update \
     && apt-get install -y --no-install-recommends libicu-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
        libzip-dev libxml2-dev rsync \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \

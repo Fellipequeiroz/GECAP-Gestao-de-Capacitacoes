@@ -7,7 +7,8 @@
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
+    // Sem Yarn: o front usa npm, e o repositório apt do Yarn está com a chave de assinatura vencida.
+    "ghcr.io/devcontainers/features/node:1": { "version": "22", "installYarnUsingApt": false }
   },
   "forwardPorts": [5173, 8080],
   "portsAttributes": {
