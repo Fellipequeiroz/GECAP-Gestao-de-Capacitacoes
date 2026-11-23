@@ -105,6 +105,7 @@ Mais detalhes em [`docs/front-end.md`](docs/front-end.md) e [`numep/README.md`](
 1. Clique em **[Abrir no GitHub Codespaces](https://codespaces.new/Fellipequeiroz/GECAP-Gestao-de-Capacitacoes)**.
 2. Na primeira vez, o contêiner baixa e instala o Moodle 5.3, o plugin e os dados de demonstração (alguns minutos; acompanhe pelo *Creation log*).
 3. Abra a porta **5173** (aba *Portas*) e entre com um dos [usuários de demonstração](#usuários-de-demonstração).
+   Se aparecer **502 Bad Gateway**, veja a [solução de problemas](#solução-de-problemas-codespaces).
 
 ### Opção 2 — Local
 
@@ -151,6 +152,57 @@ Todos com a senha **`Numep@2026`** (dados fictícios, só para demonstração):
 | Diretor | `bruno.santos@assistenciasocial.gov.br` |
 | Coordenadora (CRAS Sul) | `carla.rocha@assistenciasocial.gov.br` |
 | Técnica | `helena.nunes@assistenciasocial.gov.br` |
+
+### Solução de problemas (Codespaces)
+
+Rode os comandos no terminal do Codespace, na pasta do projeto (`/workspaces/GECAP-Gestao-de-Capacitacoes`).
+
+<details>
+<summary><b>A porta 5173 (ou 8080) mostra "502 Bad Gateway"</b></summary>
+
+O Moodle ou o front não estão ligados. Ligue os dois (o comando pode ser repetido sem problema):
+
+```bash
+bash .devcontainer/iniciar.sh
+```
+
+Espere uns segundos e recarregue a página. Isso pode acontecer ao reabrir um Codespace que estava parado.
+</details>
+
+<details>
+<summary><b>A instalação parece travada em "Running postCreateCommand..."</b></summary>
+
+É normal na primeira vez: o Codespace baixa e instala o Moodle, o que leva de 5 a 15 minutos. Acompanhe em <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → **Codespaces: View Creation Log** e não feche esse terminal. Se a instalação for interrompida, retome com:
+
+```bash
+bash .devcontainer/instalar-moodle.sh && bash .devcontainer/iniciar.sh
+```
+</details>
+
+<details>
+<summary><b>"php: command not found" no terminal</b></summary>
+
+O container não foi montado e o Codespace abriu em **modo de recuperação** (um ambiente mínimo, sem PHP). Veja o motivo no **Creation log** (procure por `ERROR`) e recrie o ambiente em <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → **Codespaces: Full Rebuild Container**.
+</details>
+
+<details>
+<summary><b>Ver os registros de erro</b></summary>
+
+```bash
+tail -n 40 /tmp/moodle.log /tmp/front.log
+```
+</details>
+
+<details>
+<summary><b>Outros comandos úteis</b></summary>
+
+```bash
+bash .devcontainer/sincronizar-plugin.sh                                      # aplica mudanças feitas na pasta numep/
+php /workspaces/moodle/public/local/numep/cli/dados_exemplo.php --confirmar   # volta aos dados de demonstração
+```
+
+A tela de administração do Moodle não abre pelo endereço do Codespace (o Moodle está configurado como `localhost:8080`); o front funciona normalmente porque fala com o Moodle por dentro do container.
+</details>
 
 ## Estrutura do repositório
 

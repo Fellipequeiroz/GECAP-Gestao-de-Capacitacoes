@@ -105,6 +105,7 @@ flowchart LR
 1. Click **[Open in GitHub Codespaces](https://codespaces.new/Fellipequeiroz/GECAP-Gestao-de-Capacitacoes)**.
 2. On first start the container downloads and installs Moodle 5.3, the plugin and demo data (a few minutes; follow the *Creation log*).
 3. Open port **5173** (*Ports* tab) and sign in with one of the [demo accounts](#demo-accounts).
+   If you get **502 Bad Gateway**, see [troubleshooting](#troubleshooting-codespaces).
 
 ### Option 2 — Local
 
@@ -151,6 +152,57 @@ All use the password **`Numep@2026`** (fictional data, for demonstration only):
 | Director | `bruno.santos@assistenciasocial.gov.br` |
 | Coordinator (CRAS Sul) | `carla.rocha@assistenciasocial.gov.br` |
 | Technician | `helena.nunes@assistenciasocial.gov.br` |
+
+### Troubleshooting (Codespaces)
+
+Run the commands in the Codespace terminal, from the project folder (`/workspaces/GECAP-Gestao-de-Capacitacoes`).
+
+<details>
+<summary><b>Port 5173 (or 8080) shows "502 Bad Gateway"</b></summary>
+
+Moodle or the front end is not running. Start both (safe to run more than once):
+
+```bash
+bash .devcontainer/iniciar.sh
+```
+
+Wait a few seconds and reload the page. This can happen when reopening a Codespace that was stopped.
+</details>
+
+<details>
+<summary><b>Setup looks stuck on "Running postCreateCommand..."</b></summary>
+
+That is expected on first start: the Codespace downloads and installs Moodle, which takes 5 to 15 minutes. Follow it in <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → **Codespaces: View Creation Log** and don't close that terminal. If setup is interrupted, resume it with:
+
+```bash
+bash .devcontainer/instalar-moodle.sh && bash .devcontainer/iniciar.sh
+```
+</details>
+
+<details>
+<summary><b>"php: command not found" in the terminal</b></summary>
+
+The container failed to build and the Codespace opened in **recovery mode** (a minimal environment without PHP). Check the reason in the **Creation log** (search for `ERROR`) and rebuild with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → **Codespaces: Full Rebuild Container**.
+</details>
+
+<details>
+<summary><b>See the error logs</b></summary>
+
+```bash
+tail -n 40 /tmp/moodle.log /tmp/front.log
+```
+</details>
+
+<details>
+<summary><b>Other useful commands</b></summary>
+
+```bash
+bash .devcontainer/sincronizar-plugin.sh                                      # apply changes made in numep/
+php /workspaces/moodle/public/local/numep/cli/dados_exemplo.php --confirmar   # reset to the demo data
+```
+
+Moodle's admin pages don't open through the Codespace URL (Moodle is configured as `localhost:8080`); the front end works normally because it talks to Moodle inside the container.
+</details>
 
 ## Repository layout
 
